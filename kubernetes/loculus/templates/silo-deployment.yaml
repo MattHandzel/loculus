@@ -54,6 +54,14 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
             timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
         - name: silo-importer
           image: "{{ $.Values.images.siloImporter.repository }}:{{ $.Values.images.siloImporter.tag | default $dockerTag }}"
           imagePullPolicy: "{{ $.Values.images.siloImporter.pullPolicy }}"
@@ -85,14 +93,6 @@ spec:
               mountPath: /preprocessing/output
             - name: lapis-silo-input-data-cache
               mountPath: /preprocessing/input
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8081
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 3
-            timeoutSeconds: 5
         - name: silo-preprocessing
           image: "{{ $.Values.images.lapisSilo.repository }}:{{ $.Values.images.lapisSilo.tag }}"
           imagePullPolicy: "{{ $.Values.images.lapisSilo.pullPolicy }}"
