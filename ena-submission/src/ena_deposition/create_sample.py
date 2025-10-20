@@ -3,7 +3,7 @@ import logging
 import re
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import pytz
@@ -403,12 +403,41 @@ def sample_table_create(db_config: SimpleConnectionPool, config: Config, test: b
         )
 
 
+def retry_biosample_submission(
+    entries_with_errors: list[dict[str, Any]],
+    db_config: SimpleConnectionPool,
+    time: datetime,
+    time_threshold: int = 12,
+):
+    for entry in entries_with_errors:
+        if time - timedelta(hours=time_threshold) > entry["started_at"]:
+            continue
+        if "does not exist in ENA" in entry.get("errors", ""):
+            seq_key = {"accession": entry["accession"], "version": entry["version"]}
+            logger.info(
+                f"Retrying biosample submission for {seq_key['accession']} version {seq_key['version']}"
+            )
+            update_values = {
+                "status": Status.READY,
+                "errors": None,
+                "finished_at": None,
+                "result": None,
+            }
+            update_with_retry(
+                db_config=db_config,
+                conditions=seq_key,
+                update_values=update_values,
+                table_name=TableName.SAMPLE_TABLE,
+            )
+
+
 def sample_table_handle_errors(
     db_config: SimpleConnectionPool,
     config: Config,
     slack_config: SlackConfig,
     time_threshold: int = 15,
     slack_time_threshold: int = 12,
+    retry_time_threshold: int = 12,
 ):
     """
     - time_threshold: (minutes)
@@ -430,6 +459,12 @@ def sample_table_handle_errors(
             slack_config,
             time=datetime.now(tz=pytz.utc),
             time_threshold=slack_time_threshold,
+        )
+        retry_biosample_submission(
+            entries_with_errors,
+            db_config,
+            time=datetime.now(tz=pytz.utc),
+            time_threshold=retry_time_threshold,
         )
         # TODO: Query ENA to check if sample has in fact been created
         # If created update sample_table
