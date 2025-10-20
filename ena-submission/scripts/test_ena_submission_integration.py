@@ -373,7 +373,7 @@ def _test_successful_assembly_submission(
     sequences_to_upload: dict[str, Any],
     single_segment: bool = False,
 ) -> None:
-    create_assembly_submission_table_start(db_config)
+    create_assembly_submission_table_start(db_config, config)
     check_assembly_submission_started(db_config, sequences_to_upload)
 
     assert config.test, "Not submitting to dev - stopping"
@@ -396,7 +396,7 @@ def _test_successful_assembly_submission(
 def _test_successful_assembly_submission_no_wait(
     db_config: SimpleConnectionPool, config: Config, sequences_to_upload: dict[str, Any]
 ) -> None:
-    create_assembly_submission_table_start(db_config)
+    create_assembly_submission_table_start(db_config, config)
     check_assembly_submission_started(db_config, sequences_to_upload)
 
     assert config.test, "Not submitting to dev - stopping"
@@ -414,7 +414,7 @@ def _test_assembly_submission_errored(
     sequences_to_upload: dict[str, Any],
     mock_notify: Mock,
 ) -> None:
-    create_assembly_submission_table_start(db_config)
+    create_assembly_submission_table_start(db_config, config)
     check_assembly_submission_started(db_config, sequences_to_upload)
 
     assert config.test, "Not submitting to dev - stopping"
@@ -423,7 +423,7 @@ def _test_assembly_submission_errored(
     assembly_table_create(db_config, config, test=config.test)
     check_assembly_submission_has_errors(db_config, sequences_to_upload)
 
-    assembly_table_handle_errors(db_config, config, slack_config, time_threshold=0)
+    assembly_table_handle_errors(db_config, config, slack_config, retry_threshold_min=0)
     msg = (
         f"{config.backend_url}: ENA Submission pipeline found 1 entries in assembly_table in "
         "status HAS_ERRORS or SUBMITTING for over 0m"
@@ -834,7 +834,7 @@ class TestIncorrectBioprojectPassed(TestSubmission):
         create_project_submission_table_start(self.db_config, self.config)
         check_project_submission_has_errors(self.db_config, sequences_to_upload)
         project_table_handle_errors(
-            self.db_config, self.config, self.slack_config, time_threshold=0
+            self.db_config, self.config, self.slack_config, retry_threshold_min=0
         )
         msg = (
             f"{self.config.backend_url}: ENA Submission pipeline found 1 entries in project_table "
@@ -902,7 +902,9 @@ class TestKnownBioprojectAndIncorrectBioSample(TestSubmission):
         # check sample submission fails and sends notification
         create_sample_submission_table_start(self.db_config, config=self.config)
         check_sample_submission_has_errors(self.db_config, sequences_to_upload)
-        sample_table_handle_errors(self.db_config, self.config, self.slack_config, time_threshold=0)
+        sample_table_handle_errors(
+            self.db_config, self.config, self.slack_config, retry_threshold_min=0
+        )
         msg = (
             f"{self.config.backend_url}: ENA Submission pipeline found 1 entries in sample_table "
             "in status HAS_ERRORS or SUBMITTING for over 0m"
