@@ -2,6 +2,7 @@ package org.loculus.backend.testutil.docker
 
 import org.loculus.backend.testutil.PostgresProvider
 import org.testcontainers.containers.PostgreSQLContainer
+import java.io.File
 
 class DockerPostgres : PostgresProvider {
     private val container = PostgreSQLContainer<Nothing>("postgres:latest")
@@ -36,5 +37,28 @@ class DockerPostgres : PostgresProvider {
                 "Database command failed with exit code ${result.exitCode}. Stderr: ${result.stderr}",
             )
         }
+    }
+
+    fun dump(outputFile: File) {
+        outputFile.parentFile?.mkdirs()
+
+        val result = container.execInContainer(
+            "pg_dump",
+            "-U",
+            container.username,
+            "-d",
+            container.databaseName,
+            "--clean",
+            "--if-exists",
+            "--inserts", // Use INSERT statements instead of COPY (more portable)
+        )
+
+        if (result.exitCode != 0) {
+            throw RuntimeException(
+                "pg_dump failed with exit code ${result.exitCode}. Stderr: ${result.stderr}",
+            )
+        }
+
+        outputFile.writeText(result.stdout)
     }
 }

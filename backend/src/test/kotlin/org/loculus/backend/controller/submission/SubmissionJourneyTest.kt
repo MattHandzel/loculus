@@ -4,6 +4,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.anEmptyMap
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.empty
+import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.loculus.backend.api.AccessionVersion
@@ -11,6 +12,7 @@ import org.loculus.backend.api.AccessionVersionInterface
 import org.loculus.backend.api.GeneticSequence
 import org.loculus.backend.api.OriginalData
 import org.loculus.backend.api.ProcessedData
+import org.loculus.backend.api.Status
 import org.loculus.backend.api.Status.APPROVED_FOR_RELEASE
 import org.loculus.backend.api.Status.IN_PROCESSING
 import org.loculus.backend.api.Status.PROCESSED
@@ -26,6 +28,19 @@ import org.springframework.beans.factory.annotation.Autowired
 
 @EndpointTest
 class SubmissionJourneyTest(@Autowired val convenienceClient: SubmissionConvenienceClient) {
+    @Test
+    fun `dump`() {
+        convenienceClient.prepareDataTo(Status.APPROVED_FOR_RELEASE)
+        convenienceClient.prepareDataTo(Status.IN_PROCESSING)
+        convenienceClient.prepareDataTo(Status.RECEIVED)
+        convenienceClient.prepareRevokedSequenceEntries()
+        convenienceClient.prepareDataTo(Status.APPROVED_FOR_RELEASE, organism = OTHER_ORGANISM)
+        convenienceClient.prepareDataTo(Status.IN_PROCESSING, organism = OTHER_ORGANISM)
+        convenienceClient.prepareDataTo(Status.RECEIVED, organism = OTHER_ORGANISM)
+
+        assertThat(convenienceClient.getReleasedData(), hasSize(30))
+    }
+
     @Test
     fun `Submission scenario, from submission, over edit and approval ending in status 'APPROVED_FOR_RELEASE'`() {
         val accessions = convenienceClient.submitDefaultFiles()
