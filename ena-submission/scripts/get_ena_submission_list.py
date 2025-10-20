@@ -124,7 +124,7 @@ def filter_for_submission(
             entry["metadata"]["accessionVersion"]: entry
             for entry in entries_to_submit.values()
             if entry["metadata"]["accession"] in revoked_entries
-        }
+        },
     )
 
 
