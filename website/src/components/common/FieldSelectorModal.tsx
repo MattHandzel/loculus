@@ -8,7 +8,7 @@ export type FieldItem = {
     header?: string;
     disabled?: boolean;
     alwaysSelected?: boolean;
-    selected?: boolean;
+    isChecked: boolean;
 };
 
 type FieldSelectorModalProps = {
@@ -16,7 +16,6 @@ type FieldSelectorModalProps = {
     onClose: () => void;
     title: string;
     fields: FieldItem[];
-    selectedFields: Set<string>;
     setFieldSelected: (fieldName: string, selected: boolean) => void;
 };
 
@@ -25,12 +24,10 @@ export const FieldSelectorModal: FC<FieldSelectorModalProps> = ({
     onClose,
     title,
     fields,
-    selectedFields,
     setFieldSelected,
 }) => {
-    const handleToggleField = (fieldName: string) => {
-        const isCurrentlySelected = selectedFields.has(fieldName);
-        setFieldSelected(fieldName, !isCurrentlySelected);
+    const handleToggleField = (fieldName: string, newIsSelected: boolean) => {
+        setFieldSelected(fieldName, newIsSelected);
 
         setTimeout(() => {
             window.dispatchEvent(new Event('resize'));
@@ -131,8 +128,8 @@ export const FieldSelectorModal: FC<FieldSelectorModalProps> = ({
                                                     ? 'opacity-60 cursor-not-allowed'
                                                     : ''
                                             }`}
-                                            checked={selectedFields.has(field.name) || Boolean(field.alwaysSelected)}
-                                            onChange={() => handleToggleField(field.name)}
+                                            checked={field.isChecked || Boolean(field.alwaysSelected)}
+                                            onChange={() => handleToggleField(field.name, !field.isChecked)}
                                             disabled={Boolean(field.disabled) || Boolean(field.alwaysSelected)}
                                         />
                                         <label
