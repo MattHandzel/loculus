@@ -9,28 +9,32 @@ import type { SequenceFilter } from './SequenceFilters.tsx';
 import { routes } from '../../../routes/routes.ts';
 import type { Metadata } from '../../../types/config.ts';
 import type { Schema } from '../../../types/config.ts';
-import type { ReferenceGenomesSequenceNames } from '../../../types/referencesGenomes.ts';
+import type { ReferenceGenomesLightweightSchema } from '../../../types/referencesGenomes.ts';
 import { ActiveFilters } from '../../common/ActiveFilters.tsx';
 import { BaseDialog } from '../../common/BaseDialog.tsx';
 
 type DownloadDialogProps = {
     downloadUrlGenerator: DownloadUrlGenerator;
     sequenceFilter: SequenceFilter;
-    referenceGenomesSequenceNames: ReferenceGenomesSequenceNames;
+    referenceGenomeLightweightSchema: ReferenceGenomesLightweightSchema;
     allowSubmissionOfConsensusSequences: boolean;
     dataUseTermsEnabled: boolean;
     metadata: Metadata[];
     richFastaHeaderFields: Schema['richFastaHeaderFields'];
+    selectedSuborganism: string | null;
+    suborganismIdentifierField: string | undefined;
 };
 
 export const DownloadDialog: FC<DownloadDialogProps> = ({
     downloadUrlGenerator,
     sequenceFilter,
-    referenceGenomesSequenceNames,
+    referenceGenomeLightweightSchema,
     allowSubmissionOfConsensusSequences,
     dataUseTermsEnabled,
     metadata,
     richFastaHeaderFields,
+    selectedSuborganism,
+    suborganismIdentifierField,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -53,7 +57,7 @@ export const DownloadDialog: FC<DownloadDialogProps> = ({
                         </div>
                     )}
                     <DownloadForm
-                        referenceGenomesSequenceNames={referenceGenomesSequenceNames}
+                        referenceGenomesLightweightSchema={referenceGenomeLightweightSchema}
                         onChange={setDownloadOption}
                         allowSubmissionOfConsensusSequences={allowSubmissionOfConsensusSequences}
                         dataUseTermsEnabled={dataUseTermsEnabled}
@@ -61,6 +65,8 @@ export const DownloadDialog: FC<DownloadDialogProps> = ({
                         selectedFields={selectedFields}
                         onSelectedFieldsChange={setSelectedFields}
                         richFastaHeaderFields={richFastaHeaderFields}
+                        selectedSuborganism={selectedSuborganism}
+                        suborganismIdentifierField={suborganismIdentifierField}
                     />
                     {dataUseTermsEnabled && (
                         <div className='mb-4 py-4'>

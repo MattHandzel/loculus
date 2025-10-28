@@ -1,34 +1,37 @@
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions, Transition } from '@headlessui/react';
-import { type FC, Fragment, useMemo, useState } from 'react';
-import * as React from 'react';
+import { type ChangeEvent, type FC, Fragment, useMemo, useState } from 'react';
 
 import { FloatingLabelContainer } from './FloatingLabelContainer.tsx';
-import type { ReferenceGenomesSequenceNames } from '../../../types/referencesGenomes.ts';
-import { parseMutationsString, type MutationQuery, parseMutationString } from '../../../utils/mutation.ts';
-import { serializeMutationQueries } from '../../../utils/mutation.ts';
+import type { SuborganismSegmentAndGeneInfo } from '../../../utils/getSuborganismSegmentAndGeneInfo.tsx';
+import {
+    type MutationQuery,
+    parseMutationsString,
+    parseMutationString,
+    serializeMutationQueries,
+} from '../../../utils/mutation.ts';
 import DisabledUntilHydrated from '../../DisabledUntilHydrated';
 import DisplaySearchDocs from '../DisplaySearchDocs';
 
 interface MutationFieldProps {
-    referenceGenomesSequenceNames: ReferenceGenomesSequenceNames;
+    suborganismSegmentAndGeneInfo: SuborganismSegmentAndGeneInfo;
     value: string;
     onChange: (mutationFilter: string) => void;
 }
 
-export const MutationField: FC<MutationFieldProps> = ({ referenceGenomesSequenceNames, value, onChange }) => {
+export const MutationField: FC<MutationFieldProps> = ({ suborganismSegmentAndGeneInfo, value, onChange }) => {
     const [options, setOptions] = useState<MutationQuery[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [hasFocus, setHasFocus] = useState(false);
 
     const selectedOptions = useMemo(
-        () => parseMutationsString(value, referenceGenomesSequenceNames),
-        [value, referenceGenomesSequenceNames],
+        () => parseMutationsString(value, suborganismSegmentAndGeneInfo),
+        [value, suborganismSegmentAndGeneInfo],
     );
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         const newValue = event.target.value;
         setInputValue(newValue);
-        const mutQuery = parseMutationString(newValue, referenceGenomesSequenceNames);
+        const mutQuery = parseMutationString(newValue, suborganismSegmentAndGeneInfo);
         const newOptions = mutQuery ? [mutQuery] : [];
         setOptions(newOptions);
     };
