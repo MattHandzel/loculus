@@ -282,6 +282,7 @@ export const DownloadForm: FC<DownloadFormProps> = ({
                 metadata={metadata}
                 selectedFields={selectedFields}
                 onSelectedFieldsChange={onSelectedFieldsChange}
+                selectedSuborganism={selectedSuborganism}
             />
         </div>
     );
