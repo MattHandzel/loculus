@@ -25,7 +25,7 @@ type DownloadFormProps = {
     onChange: (value: DownloadOption) => void;
     allowSubmissionOfConsensusSequences: boolean;
     dataUseTermsEnabled: boolean;
-    metadata: Metadata[];
+    schema: Schema;
     selectedFields: Set<string>;
     onSelectedFieldsChange: Dispatch<SetStateAction<Set<string>>>;
     richFastaHeaderFields: Schema['richFastaHeaderFields'];
@@ -51,7 +51,7 @@ export const DownloadForm: FC<DownloadFormProps> = ({
     onChange,
     allowSubmissionOfConsensusSequences,
     dataUseTermsEnabled,
-    metadata,
+    schema,
     selectedFields,
     onSelectedFieldsChange,
     richFastaHeaderFields,
@@ -113,7 +113,7 @@ export const DownloadForm: FC<DownloadFormProps> = ({
         onChange({
             dataType: downloadDataType,
             includeRestricted: includeRestricted === 1,
-            fields: dataType === 0 ? orderFieldsForDownload(selectedFields, metadata) : undefined,
+            fields: dataType === 0 ? orderFieldsForDownload(selectedFields, schema.metadata) : undefined,
             compression: compressionOptions[compression],
             dataFormat: undefined,
         });
@@ -279,7 +279,7 @@ export const DownloadForm: FC<DownloadFormProps> = ({
             <FieldSelectorModal
                 isOpen={isFieldSelectorOpen}
                 onClose={() => setIsFieldSelectorOpen(false)}
-                metadata={metadata}
+                schema={schema}
                 selectedFields={selectedFields}
                 onSelectedFieldsChange={onSelectedFieldsChange}
                 selectedSuborganism={selectedSuborganism}

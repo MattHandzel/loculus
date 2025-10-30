@@ -3,11 +3,10 @@ import { type FC, useState } from 'react';
 import { DownloadDialogButton } from './DowloadDialogButton.tsx';
 import { DownloadButton } from './DownloadButton.tsx';
 import { DownloadForm } from './DownloadForm.tsx';
-import { type DownloadUrlGenerator, type DownloadOption } from './DownloadUrlGenerator.ts';
+import { type DownloadOption, type DownloadUrlGenerator } from './DownloadUrlGenerator.ts';
 import { getDefaultSelectedFields } from './FieldSelector/FieldSelectorModal.tsx';
 import type { SequenceFilter } from './SequenceFilters.tsx';
 import { routes } from '../../../routes/routes.ts';
-import type { Metadata } from '../../../types/config.ts';
 import type { Schema } from '../../../types/config.ts';
 import type { ReferenceGenomesLightweightSchema } from '../../../types/referencesGenomes.ts';
 import { ActiveFilters } from '../../common/ActiveFilters.tsx';
@@ -19,7 +18,7 @@ type DownloadDialogProps = {
     referenceGenomeLightweightSchema: ReferenceGenomesLightweightSchema;
     allowSubmissionOfConsensusSequences: boolean;
     dataUseTermsEnabled: boolean;
-    metadata: Metadata[];
+    schema: Schema;
     richFastaHeaderFields: Schema['richFastaHeaderFields'];
     selectedSuborganism: string | null;
     suborganismIdentifierField: string | undefined;
@@ -31,7 +30,7 @@ export const DownloadDialog: FC<DownloadDialogProps> = ({
     referenceGenomeLightweightSchema,
     allowSubmissionOfConsensusSequences,
     dataUseTermsEnabled,
-    metadata,
+    schema,
     richFastaHeaderFields,
     selectedSuborganism,
     suborganismIdentifierField,
@@ -43,7 +42,9 @@ export const DownloadDialog: FC<DownloadDialogProps> = ({
 
     const [downloadOption, setDownloadOption] = useState<DownloadOption | undefined>();
     const [agreedToDataUseTerms, setAgreedToDataUseTerms] = useState(dataUseTermsEnabled ? false : true);
-    const [selectedFields, setSelectedFields] = useState<Set<string>>(getDefaultSelectedFields(metadata, selectedSuborganism)); // This is here so that the state is persisted across closing and reopening the dialog
+    const [selectedFields, setSelectedFields] = useState<Set<string>>(
+        getDefaultSelectedFields(schema.metadata, selectedSuborganism),
+    ); // This is here so that the state is persisted across closing and reopening the dialog
 
     return (
         <>
@@ -61,7 +62,7 @@ export const DownloadDialog: FC<DownloadDialogProps> = ({
                         onChange={setDownloadOption}
                         allowSubmissionOfConsensusSequences={allowSubmissionOfConsensusSequences}
                         dataUseTermsEnabled={dataUseTermsEnabled}
-                        metadata={metadata}
+                        schema={schema}
                         selectedFields={selectedFields}
                         onSelectedFieldsChange={setSelectedFields}
                         richFastaHeaderFields={richFastaHeaderFields}
